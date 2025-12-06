@@ -1,0 +1,87 @@
+{% extends "progress/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Water Intake{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4 text-primary">💧 Water Tracker</h2>
+
+    <!-- Today's Summary -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Today's Intake</h5>
+            <p class="card-text fs-4">{{ today_total }} ml</p>
+
+            {% if goal_target %}
+                <p class="mb-2">Daily Goal: {{ goal_target }} ml</p>
+                <div class="progress mb-2" style="height: 25px;">
+                    <div class="progress-bar bg-info" role="progressbar"
+                         style="width: {{ progress|floatformat:0 }}%;"
+                         aria-valuenow="{{ progress|floatformat:0 }}"
+                         aria-valuemin="0" aria-valuemax="100">
+                        {{ progress|floatformat:0 }}%
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Add Water Log -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Add Intake</h5>
+            <form method="post" action="{% url 'water:add_log' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    {{ log_form.amount_ml.label_tag }}
+                    {{ log_form.amount_ml|add_class:"form-control" }}
+                </div>
+                <div class="mb-3">
+                    {{ log_form.date.label_tag }}
+                    {{ log_form.date|add_class:"form-control" }}
+                </div>
+                <button type="submit" class="btn btn-primary">Add</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Recent Logs -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Recent Logs</h5>
+            <ul class="list-group list-group-flush">
+                {% for log in logs %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ log.date }} - {{ log.amount_ml }} ml
+                        <span>
+                            <a href="{% url 'water:edit_log' log.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <form method="post" action="{% url 'water:delete_log' log.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button onclick="return confirm('Delete?')" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </span>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">No logs yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Set Goal -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Set Daily Goal</h5>
+            <form method="post" action="{% url 'water:add_goal' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    {{ goal_form.daily_target_ml.label_tag }}
+                    {{ goal_form.daily_target_ml|add_class:"form-control" }}
+                </div>
+                <button type="submit" class="btn btn-success">Save Goal</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

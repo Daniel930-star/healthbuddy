@@ -1,0 +1,125 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="text-center mt-5">
+    <h1>Welcome to Health Buddy! ✨</h1>
+<!--    <p>Your all-in-one platform for workouts, nutrition, progress tracking, and fitness goals.</p>-->
+</div>
+
+{% if not user.is_authenticated %}
+
+<!-- Carousel Container -->
+<div id="landingCarousel" class="carousel slide" data-bs-ride="carousel">
+
+    <div class="carousel-inner">
+
+        <!-- Slide 1 -->
+        <div class="carousel-item active">
+            <div class="carousel-text-overlay">
+                <h2 class="typing" data-text="Welcome to FitTrack — your all-in-one fitness and wellness companion."></h2>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="carousel-item">
+            <div class="carousel-text-overlay">
+                <h2 class="typing" data-text="Tracking your health keeps you consistent, motivated, and aware of your progress."></h2>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="carousel-item">
+            <div class="carousel-text-overlay">
+                <h2 class="typing" data-text="Workouts — log exercises, track reps, sets, and improve over time."></h2>
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="carousel-item">
+            <div class="carousel-text-overlay">
+                <h2 class="typing" data-text="Nutrition — monitor your meals, calories, and fuel your progress."></h2>
+            </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="carousel-item">
+            <div class="carousel-text-overlay">
+                <h2 class="typing" data-text="Water — stay hydrated and keep your body functioning at its best."></h2>
+            </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="carousel-item">
+            <div class="carousel-text-overlay">
+                <h2 class="typing" data-text="Goals — set goals, stay accountable, and celebrate achievements."></h2>
+            </div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="carousel-item">
+            <div class="carousel-text-overlay">
+                <h2 class="typing" data-text="Progress — track your journey with visuals and weekly reviews."></h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Carousel Controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#landingCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+
+    <button class="carousel-control-next" type="button" data-bs-target="#landingCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+
+</div>
+
+<!-- Get Started Button -->
+<div class="text-center mt-4">
+    <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-4 py-2">
+        Get Started
+    </a>
+</div>
+
+{% else %}
+
+<!-- If user IS authenticated, show your normal dashboard -->
+{% include 'home/dashboard.html' %}
+
+{% endif %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const carousel = document.getElementById("landingCarousel");
+
+    function typeEffect(element, text, speed = 40) {
+        element.innerHTML = "";
+        let i = 0;
+
+        function typing() {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typing, speed);
+            }
+        }
+        typing();
+    }
+
+    // Trigger typing on slide change
+    const elements = document.querySelectorAll(".typing");
+
+    elements.forEach((el, index) => {
+        if (index === 0) {
+            typeEffect(el, el.dataset.text);
+        }
+    });
+
+    carousel.addEventListener("slid.bs.carousel", function () {
+        let active = document.querySelector(".carousel-item.active .typing");
+        typeEffect(active, active.dataset.text);
+    });
+});
+</script>
+
+{% endblock %}

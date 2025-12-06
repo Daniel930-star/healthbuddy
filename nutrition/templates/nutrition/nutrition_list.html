@@ -1,0 +1,66 @@
+{% extends "nutrition/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Nutrition Tracker</h2>
+
+    <!-- Add Meal Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        {{ form.meal_type|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.food_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.calories|as_crispy_field }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.date|as_crispy_field }}
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-success w-100">Add</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Nutrition History Table -->
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Meal</th>
+                <th>Food</th>
+                <th>Calories</th>
+                <th>Date</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.meal_type|title }}</td>
+                <td>{{ log.food_name }}</td>
+                <td>{{ log.calories }}</td>
+                <td>{{ log.date }}</td>
+                <td class="text-center">
+                    <a href="{% url 'nutrition:edit_nutrition' log.id %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'nutrition:delete_nutrition' log.id %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center text-muted">No meals logged yet!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

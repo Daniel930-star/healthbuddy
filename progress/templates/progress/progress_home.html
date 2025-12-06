@@ -1,0 +1,221 @@
+{% extends "progress/base.html" %}
+{% load static %}
+
+{% block title %}Progress{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header Buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Progress Dashboard</h2>
+        <div>
+            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addLogModal">Add Meal</button>
+            <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#addGoalModal">Add Goal</button>
+            <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addPhotoModal">Add Photo</button>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h6 class="mb-1">Daily Calorie Target</h6>
+                <p class="fs-4 mb-0">{% if goal_target %}{{ goal_target }} kcal{% else %}<span class="text-muted">No active goal</span>{% endif %}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h6 class="mb-1">Calories (last 7 days)</h6>
+                <p class="fs-4 mb-0">{{ weekly_total }} kcal</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h6 class="mb-1">Days Shown</h6>
+                <p class="fs-4 mb-0">30 days</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calories Chart -->
+    <div class="card mb-4 p-3">
+        <h5>Calories per Day (last 30 days)</h5>
+        <canvas id="caloriesChart" height="90"></canvas>
+    </div>
+
+    <!-- Nutrition Logs Table -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">Nutrition Logs (last 30 days)</h5>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Meal</th>
+                            <th>Calories</th>
+                            <th>Notes</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for log in logs %}
+                        <tr data-log-id="{{ log.id }}" data-log-meal="{{ log.meal|escapejs }}" data-log-calories="{{ log.calories }}" data-log-date="{{ log.date }}" data-log-notes="{{ log.notes|default:''|escapejs }}">
+                            <td>{{ log.date }}</td>
+                            <td>{{ log.meal }}</td>
+                            <td>{{ log.calories }}</td>
+                            <td>{{ log.notes|default:"" }}</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary me-2 btn-edit-log" data-bs-toggle="modal" data-bs-target="#editLogModal">Edit</button>
+                                <form method="post" action="{% url 'progress:delete_log' log.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this log?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-3">No logs in the last 30 days.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goals Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Nutrition Goals</h5>
+                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addGoalModal">Add Goal</button>
+            </div>
+
+            {% if goal_target %}
+            <div class="alert alert-success">
+                <strong>Active Goal:</strong> {{ goal_target }} kcal/day
+            </div>
+            {% else %}
+            <p class="text-muted">No active goal yet.</p>
+            {% endif %}
+
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Target</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for goal in goals %}
+                        <tr>
+                            <td>{{ goal.daily_calorie_target }} kcal</td>
+                            <td>{{ goal.start_date }}</td>
+                            <td>{{ goal.end_date|default:"—" }}</td>
+                            <td>{% if goal.active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}</td>
+                            <td class="text-end">
+                                <a href="{% url 'progress:edit_goal' goal.id %}" class="btn btn-sm btn-outline-secondary me-2">Edit</a>
+                                <form method="post" action="{% url 'progress:delete_goal' goal.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this goal?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No goals set.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Photos Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Progress Photos</h5>
+                <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addPhotoModal">Add Photo</button>
+            </div>
+            <div class="row g-3">
+                {% for photo in photos %}
+                <div class="col-6 col-md-3">
+                    <div class="card">
+                        <img src="{{ photo.photo.url }}" class="card-img-top" alt="Progress Photo">
+                        <div class="card-body text-center py-2">
+                            <small class="text-muted">{{ photo.date }}</small>
+                            <form method="post" action="{% url 'progress:delete_photo' photo.id %}" class="mt-1">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-outline-danger w-100" onclick="return confirm('Delete this photo?')">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">No progress photos yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modals: Add/Edit Log, Add Goal, Add Photo (keep your current modal code here) -->
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart.js
+    const labels = {{ labels|safe }};
+    const data = {{ calories_data|safe }};
+    const ctx = document.getElementById('caloriesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Calories',
+                data: data,
+                borderWidth: 0,
+                barPercentage: 0.9,
+                categoryPercentage: 0.7
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { ticks: { maxRotation: 90, minRotation: 45, display: false } },
+                y: { beginAtZero: true }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // Edit Log Modal
+    const editButtons = document.querySelectorAll('.btn-edit-log');
+    editButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const tr = e.target.closest('tr');
+            const id = tr.dataset.logId;
+            document.getElementById('edit_meal').value = tr.dataset.logMeal || '';
+            document.getElementById('edit_calories').value = tr.dataset.logCalories || '';
+            document.getElementById('edit_date').value = tr.dataset.logDate || '';
+            document.getElementById('edit_notes').value = tr.dataset.logNotes || '';
+
+            const form = document.getElementById('editLogForm');
+            form.action = `/progress/edit-log/${id}/`;
+        });
+    });
+});
+</script>
+{% endblock %}

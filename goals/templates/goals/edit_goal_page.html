@@ -1,0 +1,45 @@
+{% extends "progress/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Edit Goal{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm p-4">
+                <h3 class="card-title mb-4 text-center">Edit Goal</h3>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ form.daily_calorie_target.label_tag }}
+                        {{ form.daily_calorie_target|add_class:"form-control" }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.start_date.label_tag }}
+                        {{ form.start_date|add_class:"form-control" }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.end_date.label_tag }}
+                        {{ form.end_date|add_class:"form-control" }}
+                    </div>
+
+                    <div class="form-check mb-3">
+                        {{ form.active|add_class:"form-check-input" }}
+                        <label class="form-check-label ms-2">Active</label>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'progress:progress_home' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success">Save Changes</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

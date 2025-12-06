@@ -1,0 +1,121 @@
+{% extends "progress/base.html" %}
+
+{% block title %}Progress Photos{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h2>Progress Photos</h2>
+
+    <!-- Upload Form -->
+    <div class="card mb-4 p-3">
+        <h5>Upload Photo</h5>
+        <form method="post" enctype="multipart/form-data" action="{% url 'progress:add_photo' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ photo_form.photo.label_tag }}
+                {{ photo_form.photo }}
+            </div>
+            <div class="mb-3">
+                {{ photo_form.date.label_tag }}
+                {{ photo_form.date }}
+            </div>
+            <div class="mb-3">
+                {{ photo_form.notes.label_tag }}
+                {{ photo_form.notes }}
+            </div>
+            <button class="btn btn-primary" type="submit">Upload</button>
+        </form>
+    </div>
+
+    <!-- Photos Grid -->
+    <form id="compare-form">
+        <div class="row row-cols-1 row-cols-md-3 g-3">
+            {% for photo in photos %}
+            <div class="col">
+                <div class="card h-100">
+                    <img src="{{ photo.photo.url }}" class="card-img-top" alt="Progress photo">
+                    <div class="card-body">
+                        <p class="card-text">{{ photo.date }}</p>
+                        <p class="card-text">{{ photo.notes|default:"" }}</p>
+                        <div class="form-check">
+                            <input class="form-check-input compare-checkbox" type="checkbox" value="{{ photo.id }}">
+                            <label class="form-check-label">Select for comparison</label>
+                        </div>
+                    </div>
+                    <div class="card-footer text-end">
+                        <form method="post" action="{% url 'progress:delete_photo' photo.id %}">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this photo?')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal" data-bs-target="#carouselModal" id="compare-btn">
+            Compare Selected
+        </button>
+    </form>
+
+    <!-- Carousel Modal -->
+    <div class="modal fade" id="carouselModal" tabindex="-1" aria-labelledby="carouselModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Compare Progress Photos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="compareCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner" id="carousel-inner">
+                            <!-- Selected photos will be inserted dynamically -->
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#compareCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#compareCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('compare-btn').addEventListener('click', function() {
+    const selected = document.querySelectorAll('.compare-checkbox:checked');
+    const carouselInner = document.getElementById('carousel-inner');
+    carouselInner.innerHTML = '';
+
+    if(selected.length < 2) {
+        carouselInner.innerHTML = '<div class="text-danger text-center p-3">Select at least 2 photos to compare.</div>';
+        return;
+    }
+
+    selected.forEach((cb, index) => {
+        const photoCard = document.querySelector(`.compare-checkbox[value="${cb.value}"]`).closest('.card');
+        const imgSrc = photoCard.querySelector('img').src;
+        const imgDate = photoCard.querySelector('.card-text').innerText;
+
+        const carouselItem = document.createElement('div');
+        carouselItem.classList.add('carousel-item');
+        if(index === 0) carouselItem.classList.add('active');
+
+        carouselItem.innerHTML = `
+            <div class="d-flex justify-content-center align-items-center flex-wrap">
+                <img src="${imgSrc}" class="img-fluid rounded me-2" style="max-height:400px;">
+            </div>
+            <div class="text-center mt-2">${imgDate}</div>
+        `;
+        carouselInner.appendChild(carouselItem);
+    });
+});
+</script>
+{% endblock %}

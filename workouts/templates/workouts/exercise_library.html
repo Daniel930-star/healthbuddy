@@ -1,0 +1,24 @@
+{% extends "workouts/base.html" %}
+{% block title %}Exercise Library{% endblock %}
+
+{% block content %}
+<h2>Exercise Library</h2>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for exercise in exercises %}
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ exercise.name }}</h5>
+                <p class="card-text">{{ exercise.description }}</p>
+            </div>
+            <div class="card-footer">
+                <small class="text-muted">Muscle Group: {{ exercise.muscle_group }}</small>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>No exercises available.</p>
+    {% endfor %}
+</div>
+{% endblock %}

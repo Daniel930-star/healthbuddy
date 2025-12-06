@@ -1,0 +1,35 @@
+{% extends "workouts/base.html" %}
+
+{% block title %}Workout Plans{% endblock %}
+
+{% block content %}
+<h2>Workout Plans
+    <a href="{% url 'workout_history' %}" class="history-button">Workout History</a>
+</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Plan</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for workout in workouts %}
+        <tr>
+            <td>{{ workout.date|date:"M d, Y" }}</td>
+            <td>{{ workout.plan }}</td>
+            <td class="actions">
+                <a href="{% url 'edit_workout' workout.id %}">Edit</a>
+                <a href="{% url 'delete_workout' workout.id %}" class="delete">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">No workouts found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+
+    <!-- Bootstrap (needed for carousel) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .carousel-item {
+            height: 100vh;
+            background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+            position: relative;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%; width: 100%;
+            background: rgba(0, 0, 0, 0.55);
+        }
+
+        .slide-content {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 700px;
+            text-align: center;
+            font-size: 24px;
+            padding: 20px;
+        }
+
+        #typedText {
+            min-height: 220px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .start-btn {
+            margin-top: 30px;
+            padding: 12px 28px;
+            font-size: 20px;
+            border: none;
+            background: #0066ff;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            transition: .3s;
+        }
+
+        .start-btn:hover {
+            background: #004bcc;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="welcomeCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+
+    <div class="carousel-inner">
+
+        <!-- Slide Templates -->
+        {% for text in slides %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <div class="overlay"></div>
+                <div class="slide-content">
+                    <div id="typedText{{ forloop.counter }}" class="typedBox"></div>
+
+                    {% if forloop.last %}
+                        <a href="{% url 'login' %}" class="start-btn">Get Started</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<script>
+    const slideTexts = {{ slides|safe }};
+    let activeSlide = 0;
+
+    function typeSlide(index) {
+        const element = document.getElementById("typedText" + (index + 1));
+        let text = slideTexts[index];
+        let i = 0;
+
+        function typeChar() {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeChar, 20);
+            }
+        }
+        typeChar();
+    }
+
+    // Type first slide
+    typeSlide(0);
+
+    // Re-type when entering each slide
+    const carousel = document.getElementById('welcomeCarousel');
+    carousel.addEventListener('slide.bs.carousel', function (event) {
+        activeSlide = event.to;
+        const element = document.getElementById("typedText" + (activeSlide + 1));
+        element.innerHTML = "";
+        setTimeout(() => typeSlide(activeSlide), 300);
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

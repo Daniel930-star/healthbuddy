@@ -1,0 +1,30 @@
+{% extends "workouts/base.html" %}
+{% block title %}Workout History{% endblock %}
+
+{% block content %}
+<h2>Workout History</h2>
+
+{% for workout in workouts %}
+<div class="card mb-3">
+    <div class="card-header">
+        {{ workout.date|date:"M d, Y" }}
+        {% if workout.plan %}
+            - Plan: {{ workout.plan.name }}
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            {% for log in workout.workoutlog_set.all %}
+            <li class="list-group-item">
+                {{ log.exercise.name }}: {{ log.sets }} sets x {{ log.reps }} reps @ {{ log.weight }}kg
+            </li>
+            {% empty %}
+            <li class="list-group-item">No exercises logged.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% empty %}
+<p>No workouts logged yet.</p>
+{% endfor %}
+{% endblock %}

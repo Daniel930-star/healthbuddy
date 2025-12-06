@@ -1,0 +1,32 @@
+{% extends "workouts/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Log Workout</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="exercise">Exercise</label>
+            <select class="form-select" name="exercise" id="exercise">
+                {% for exercise in exercises %}
+                    <option value="{{ exercise.id }}">{{ exercise.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="reps">Reps</label>
+            <input type="number" class="form-control" name="reps" id="reps">
+        </div>
+        <div class="mb-3">
+            <label for="sets">Sets</label>
+            <input type="number" class="form-control" name="sets" id="sets">
+        </div>
+        <div class="mb-3">
+            <label for="weight">Weight (kg)</label>
+            <input type="number" class="form-control" name="weight" id="weight" step="0.1">
+        </div>
+        <button type="submit" class="btn btn-primary">Log Workout</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "progress/base.html" %}
+{% block content %}
+<div class="container my-5">
+  <h3>Edit Log</h3>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-primary">Save</button>
+    <a class="btn btn-secondary" href="{% url 'progress:progress_home' %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}
